@@ -3,16 +3,17 @@
  */
 
 import React, { useState } from "react";
-import { Expense, ExpenseFormData } from "../types";
+import { Expense, ExpenseFormData, Category } from "../types";
 import { formatCurrency, formatDate } from "../utils/expenseUtils";
 import { getCategoryEmoji } from "../constants/categoryEmojis";
 import { COLORS } from "../constants/colors";
 import { Button, Modal, Pagination } from "../vibes";
-import { ExpenseForm } from "./ExpenseForm.tsx";
+import { ExpenseForm } from "./ExpenseForm";
 import { deleteExpense, updateExpense } from "../services/api";
 
 interface CalendarExpenseTableProps {
   expenses: Expense[];
+  categories: Category[];
   onExpenseUpdated: () => void;
 }
 
@@ -20,6 +21,7 @@ const ITEMS_PER_PAGE = 10;
 
 export function CalendarExpenseTable({
   expenses,
+  categories,
   onExpenseUpdated,
 }: CalendarExpenseTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,6 +47,7 @@ export function CalendarExpenseTable({
 
   const confirmDelete = async () => {
     if (!deletingExpense) return;
+
     try {
       await deleteExpense(deletingExpense.id);
       setIsDeleteModalOpen(false);
@@ -58,6 +61,7 @@ export function CalendarExpenseTable({
 
   const handleUpdate = async (data: ExpenseFormData) => {
     if (!editingExpense) return;
+
     try {
       await updateExpense(editingExpense.id, data);
       setIsEditModalOpen(false);
@@ -129,6 +133,7 @@ export function CalendarExpenseTable({
             <th style={{ ...thStyle, textAlign: "center" }}>Actions</th>
           </tr>
         </thead>
+
         <tbody>
           {currentExpenses.map((expense) => (
             <tr key={expense.id}>
@@ -158,6 +163,7 @@ export function CalendarExpenseTable({
                   >
                     Edit
                   </Button>
+
                   <Button
                     variant="danger"
                     size="small"
@@ -188,6 +194,7 @@ export function CalendarExpenseTable({
       >
         {editingExpense && (
           <ExpenseForm
+            categories={categories}
             initialData={{
               amount: editingExpense.amount.toString(),
               description: editingExpense.description,
@@ -216,12 +223,14 @@ export function CalendarExpenseTable({
           <p style={{ marginBottom: "1.5rem", color: COLORS.text.primary }}>
             Are you sure you want to delete this expense?
           </p>
+
           {deletingExpense && (
             <p style={{ marginBottom: "1.5rem", color: COLORS.text.secondary }}>
               <strong>{deletingExpense.description}</strong> -{" "}
               {formatCurrency(deletingExpense.amount)}
             </p>
           )}
+
           <div
             style={{
               display: "flex",
@@ -238,6 +247,7 @@ export function CalendarExpenseTable({
             >
               Cancel
             </Button>
+
             <Button variant="danger" onClick={confirmDelete}>
               Delete
             </Button>
